@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import _ from "lodash";
-import { ref } from "vue";
+import { ref, toRefs, computed, onMounted } from "vue";
 import fakerData from "../../utils/faker";
 import Button from "../../base-components/Button";
 import {
@@ -9,6 +9,7 @@ import {
     FormSelect,
     FormTextarea,
 } from "../../base-components/Form";
+import SelectProject from "../../components/Form/SelectProject.vue";
 import Lucide from "../../base-components/Lucide";
 import Tippy from "../../base-components/Tippy";
 import TomSelect from "../../base-components/TomSelect";
@@ -22,6 +23,18 @@ import {
     integer,
 } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
+import { useToast } from "vue-toast-notification";
+import { UserService } from "../../services/user";
+import { useUserSession } from "../../stores/userSession";
+import { useRouter } from "vue-router";
+const toast = useToast();
+const router = useRouter();
+let { user } = toRefs(useUserSession());
+
+let userId = computed(() => {
+    return user.value?.id;
+})
+
 let form = ref({
     address: "",
     aktLastname: "",
@@ -29,59 +42,47 @@ let form = ref({
     aktPhone: "",
     aktPositionId: "",
     aktSecondName: "",
-    capacity: 0,
+    avatar: "",
     email: "",
-    govermental: 0,
-    head: "",
     headLastname: "",
     headName: "",
     headPositionId: "",
     headSecondName: "",
     inn: "",
-    latitude: 0,
-    longitude: 0,
-    maktabErpId: 0,
+    latitude: "",
+    longitude: "",
     name: "",
     needPc: 0,
-    number: "",
+    password: "",
     phone: "",
-    schoolTypeId: 0,
     shortName: "",
-    soatoId: "",
-    studentCount: 0,
     website: ""
 })
 
 const rules = {
     address: {
-        required
+
     },
     aktLastname: {
-        required
+
     },
     aktName: {
-        required
+
     },
     aktPhone: {
-        required
+
     },
     aktPositionId: {
-        required
+
     },
     aktSecondName: {
-        required
+
     },
-    capacity: {
+    avatar: {
 
     },
     email: {
-        required
-    },
-    govermental: {
 
-    },
-    head: {
-        required
     },
     headLastname: {
 
@@ -105,41 +106,63 @@ const rules = {
 
     },
     name: {
-        required
+
     },
     needPc: {
 
     },
-    number: {
-        required
+    password: {
+
     },
     phone: {
-        required
-    },
-    schoolTypeId: {
 
     },
+
     shortName: {
-        required
-    },
-    soatoId: {
 
     },
-    studentCount: {
 
-    },
+
     website: {
 
     }
 };
 
 const v$ = useVuelidate(rules, form.value);
+let loading = ref(false);
+async function getData() {
+    try {
+        loading.value = true;
+        let res = await UserService.getProfile()
+        let data = res.data as any;
+        for (const key in data) {
+            if (key in form.value) {
+                (form.value as any)[key] = data[key]
+            }
+        }
+    }
+    finally {
 
-const onSubmit = () => {
-    v$.value.$touch();
-    if (v$.value.$invalid) {
+    }
+}
+
+onMounted(() => {
+    getData()
+})
 
 
+
+let updateLoading = ref(false);
+async function validate() {
+    let result = await v$.value.$validate();
+    return result
+}
+async function onSubmit() {
+    console.log((await validate()));
+    if ((await validate())) {
+        await UserService.update(userId.value, form.value)
+        toast.success("Ma'lumotlar muvaffaqiyatli saqlandi");
+        await router.push("/profile");
     } else {
 
     }
@@ -177,18 +200,43 @@ const select = ref("1");
                                 Bu maydon bo'sh bo'lishi mumkin emas
                             </p>
                         </div>
-                        <div class="mt-3">
-                            <FormLabel htmlFor="shortname">Raqami</FormLabel>
-                            <FormInput id="shortname" type="text" v-model:modelValue="form.number" />
-                            <p class="mt-2 text-danger" v-if="v$.number.$error">
-                                Bu maydon bo'sh bo'lishi mumkin emas
-                            </p>
-                        </div>
 
                         <div class="mt-3">
                             <FormLabel htmlFor="inn">Inn</FormLabel>
                             <FormInput id="inn" type="text" v-model:modelValue="form.inn" />
                             <p class="mt-2 text-danger" v-if="v$.inn.$error">
+                                Bu maydon bo'sh bo'lishi mumkin emas
+                            </p>
+                        </div>
+
+                        <div class="mt-3">
+                            <FormLabel htmlFor="password">Parol</FormLabel>
+                            <FormInput id="password" type="text" v-model:modelValue="form.password" />
+                            <p class="mt-2 text-danger" v-if="v$.password.$error">
+                                Bu maydon bo'sh bo'lishi mumkin emas
+                            </p>
+                        </div>
+                        <div class="mt-3">
+                            <FormLabel htmlFor="address">Manzili</FormLabel>
+                            <FormTextarea id="address" type="text" v-model:modelValue="form.address" />
+                            <p class="mt-2 text-danger" v-if="v$.address.$error">
+                                Bu maydon bo'sh bo'lishi mumkin emas
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-span-12 xl:col-span-6">
+
+                        <div>
+                            <FormLabel htmlFor="needPc">Ehtiyoj</FormLabel>
+                            <FormInput id="needPc" type="text" v-model:modelValue="form.needPc" />
+                            <p class="mt-2 text-danger" v-if="v$.needPc.$error">
+                                Bu maydon bo'sh bo'lishi mumkin emas
+                            </p>
+                        </div>
+                        <div class="mt-3">
+                            <FormLabel htmlFor="website">Veb sayt</FormLabel>
+                            <FormInput id="website" type="text" v-model:modelValue="form.website" />
+                            <p class="mt-2 text-danger" v-if="v$.website.$error">
                                 Bu maydon bo'sh bo'lishi mumkin emas
                             </p>
                         </div>
@@ -206,53 +254,7 @@ const select = ref("1");
                                 Bu maydon bo'sh bo'lishi mumkin emas
                             </p>
                         </div>
-
-                    </div>
-                    <div class="col-span-12 xl:col-span-6">
-                        <div>
-                            <FormLabel htmlFor="capacity">Sig'imi</FormLabel>
-                            <FormInput id="capacity" type="text" v-model:modelValue="form.capacity" />
-                            <p class="mt-2 text-danger" v-if="v$.capacity.$error">
-                                Bu maydon bo'sh bo'lishi mumkin emas
-                            </p>
-                        </div>
-                        <div class="mt-3">
-                            <FormLabel htmlFor="studentCount">Talabalar soni</FormLabel>
-                            <FormInput id="studentCount" type="text" v-model:modelValue="form.studentCount" />
-                            <p class="mt-2 text-danger" v-if="v$.studentCount.$error">
-                                Bu maydon bo'sh bo'lishi mumkin emas
-                            </p>
-                        </div>
-                        <div class="mt-3">
-                            <FormLabel htmlFor="needPc">Ehtiyoj</FormLabel>
-                            <FormInput id="needPc" type="text" v-model:modelValue="form.needPc" />
-                            <p class="mt-2 text-danger" v-if="v$.needPc.$error">
-                                Bu maydon bo'sh bo'lishi mumkin emas
-                            </p>
-                        </div>
-                        <div class="mt-3">
-                            <FormLabel htmlFor="website">Veb sayt</FormLabel>
-                            <FormInput id="website" type="text" v-model:modelValue="form.website" />
-                            <p class="mt-2 text-danger" v-if="v$.website.$error">
-                                Bu maydon bo'sh bo'lishi mumkin emas
-                            </p>
-                        </div>
-                        <div class="mt-3">
-                            <FormLabel htmlFor="website">Maktab turi</FormLabel>
-                            <FormInput id="website" type="text" v-model:modelValue="form.schoolTypeId" />
-                            <p class="mt-2 text-danger" v-if="v$.schoolTypeId.$error">
-                                Bu maydon bo'sh bo'lishi mumkin emas
-                            </p>
-                        </div>
-                        <div class="mt-3">
-                            <FormLabel htmlFor="website">Davlat maktabi/ Xususiy maktab</FormLabel>
-                            <div class="mt-2">
-                                <n-radio-group v-model:value="form.govermental" name="radiogroup">
-                                    <n-radio-button :value="1">Xususiy maktab</n-radio-button>
-                                    <n-radio-button :value="0"> Davlat maktabi </n-radio-button>
-                                </n-radio-group>
-                            </div>
-                        </div>
+                       
 
                     </div>
                 </div>
@@ -297,15 +299,7 @@ const select = ref("1");
                             </div>
                             <div class="mt-3">
                                 <FormLabel htmlFor="aktPositionId">Lavozimi</FormLabel>
-                                <TomSelect v-model="form.aktPositionId" class="w-full" :options="{
-                                    placeholder: 'Tanlang',
-                                }">
-                                    <option value="8">Leonardo DiCaprio</option>
-                                    <option value="2">Johnny Deep</option>
-                                    <option value="3">Robert Downey, Jr</option>
-                                    <option value="4">Samuel L. Jackson</option>
-                                    <option value="5">Morgan Freeman</option>
-                                </TomSelect>
+                                <SelectProject v-model:value="form.aktPositionId" />
                                 <p class="mt-2 text-danger" v-if="v$.aktPositionId.$error">
                                     Bu maydon bo'sh bo'lishi mumkin emas
                                 </p>
@@ -347,7 +341,7 @@ const select = ref("1");
                             </div>
                             <div class="mt-3">
                                 <FormLabel htmlFor="headPositionId">Lavozimi</FormLabel>
-                                <FormInput id="headPositionId" type="text" v-model:modelValue="form.headPositionId" />
+                                <SelectProject v-model:value="form.headPositionId" />
                                 <p class="mt-2 text-danger" v-if="v$.headPositionId.$error">
                                     Bu maydon bo'sh bo'lishi mumkin emas
                                 </p>

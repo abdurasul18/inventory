@@ -3,13 +3,16 @@ import _ from "lodash";
 import Table from "../../base-components/Table";
 import Preview from "../../base-components/Preview";
 import { FormSwitch, FormInput, FormSelect } from "../../base-components/Form";
-
+import { Dialog } from "../../base-components/Headless";
 import Button from "../../base-components/Button";
 import Lucide from "../../base-components/Lucide";
 import AppNotFound from "../../base-components/AppNotFound.vue";
 import { ref, onMounted, computed, watch } from "vue";
 import { PositionService, IPosition } from "../../services/reference/position";
 import Loading from "../../base-components/Loading/Loading.vue";
+import AddUpdatePosition from "../../components/pages/AddUpdatePosition.vue";
+import { useToast } from "vue-toast-notification";
+const toast = useToast();
 let loading = ref(false);
 let list = ref<IPosition[]>([]);
 let addShow = ref(false);
@@ -20,7 +23,7 @@ let limit = ref(10)
 let limits = ref([10, 20, 50, 100])
 let payload = computed(() => {
   return {
-    page: page.value,
+    page: page.value - 1,
     size: limit.value,
     search: search.value,
   };
@@ -43,18 +46,53 @@ onMounted(() => {
 watch(() => payload.value, () => {
   getList();
 });
+
+let addLoading = ref(false)
+let mode = ref<'create' | 'update'>('create')
+let currentItem = ref<IPosition>()
+async function addItem(item: any) {
+  addLoading.value = true
+  try {
+    if (mode.value == 'create') {
+      let res = await PositionService.create(item)
+    }
+    else {
+      let res = await PositionService.update(currentItem.value?.id, item)
+    }
+    addShow.value = false
+    toast.info('Muvaffaqiyatli saqlandi')
+    getList()
+  }
+  finally {
+    addLoading.value = false
+  }
+}
+let deleteShow = ref(false)
+
+async function deleteItem() {
+  deleteShow.value = false
+  loading.value = true
+  try {
+    await PositionService.delete(currentItem.value?.id)
+    toast.info('Muvaffaqiyatli o`chirildi')
+    getList()
+  }
+  finally {
+    loading.value = false
+  }
+}
 </script>
 
 <template>
   <div class="intro-y box">
     <div class="flex flex-col items-center p-5 border-b sm:flex-row border-slate-200/60">
       <h2 class="mr-auto text-base font-medium">Lavozim</h2>
-      <Button variant="primary">
+      <Button @click="mode = 'create', addShow = true" variant="primary">
         <Lucide icon="Plus" class="mr-2" /> Qo'shish
       </Button>
     </div>
     <div class="flex items-center px-4">
-      <FormInput  id="tabulator-html-filter-value" v-model="search" type="text" class="mt-2 w-40 mr-2"
+      <FormInput id="tabulator-html-filter-value" v-model="search" type="text" class="mt-2 w-40 mr-2"
         placeholder="Search..." />
       <FormSelect id="tabulator-html-filter-field" v-model="limit" class="mt-2 w-40">
         <option v-for="item in limits" :value="item">{{ item }}</option>
@@ -67,34 +105,59 @@ watch(() => payload.value, () => {
           <Table.Thead variant="light">
             <Table.Tr>
               <Table.Th class="whitespace-nowrap">#</Table.Th>
-              <Table.Th class="whitespace-nowrap"> First Name </Table.Th>
-              <Table.Th class="whitespace-nowrap"> Last Name </Table.Th>
-              <Table.Th class="whitespace-nowrap"> Username </Table.Th>
+              <Table.Th class="whitespace-nowrap">Nomi </Table.Th>
+              <Table.Th class="text-right"> Amallar </Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            <Table.Tr>
-              <Table.Td>1</Table.Td>
-              <Table.Td>Angelina</Table.Td>
-              <Table.Td>Jolie</Table.Td>
-              <Table.Td>@angelinajolie</Table.Td>
-            </Table.Tr>
-            <Table.Tr>
-              <Table.Td>2</Table.Td>
-              <Table.Td>Brad</Table.Td>
-              <Table.Td>Pitt</Table.Td>
-              <Table.Td>@bradpitt</Table.Td>
-            </Table.Tr>
-            <Table.Tr>
-              <Table.Td>3</Table.Td>
-              <Table.Td>Charlie</Table.Td>
-              <Table.Td>Hunnam</Table.Td>
-              <Table.Td>@charliehunnam</Table.Td>
+            <Table.Tr v-for="(item, index) in list">
+              <Table.Td>{{ index + 1 }}</Table.Td>
+              <Table.Td>{{ item.name }}</Table.Td>
+              <Table.Td class="text-right">
+                <Button @click="currentItem = item, mode = 'update', addShow = true">
+                  <Lucide class="w-4" icon="Edit" />
+                </Button>
+                <Button @click="currentItem = item, deleteShow = true" class="ml-1">
+                  <Lucide class="w-4 text-danger" icon="Trash" />
+                </Button>
+              </Table.Td>
             </Table.Tr>
           </Table.Tbody>
-          <AppNotFound  v-if="!list.length"/>
+          <AppNotFound v-if="!list.length" />
         </Table>
+        <div class="flex justify-end">
+          <n-pagination class="mt-4" v-model:page="page" :item-count="total" :page-sizes="[10, 20, 30, 40]"
+            v-model:page-size="limit" show-size-picker />
+        </div>
       </div>
     </Loading>
+    <!-- BEGIN: Modal Toggle -->
+    <!-- END: Modal Toggle -->
+    <!-- BEGIN: Modal Content -->
+    <Dialog staticBackdrop :open="addShow" @close="addShow = false">
+      <Dialog.Panel class="px-5 py-10">
+        <Loading :active="loading">
+          <AddUpdatePosition @close="addShow = false" @success="addItem" :item="currentItem" :mode="mode" />
+        </Loading>
+      </Dialog.Panel>
+    </Dialog>
+    <!-- END: Modal Content -->
+    <Dialog :open="deleteShow" @close="deleteShow = false">
+      <Dialog.Panel>
+
+        <div class="p-5 text-center">
+          <Lucide icon="FileQuestion" class="w-16 h-16 mx-auto mt-3 text-success" />
+          <div class="mt-5 text-3xl">Tasdiqlang</div>
+          <div class="mt-2 text-slate-500">
+            Rostan ham o'chirmoqchimisiz?
+          </div>
+        </div>
+        <div class="px-5 pb-8 text-center">
+          <Button type="button" variant="primary" @click="deleteItem" class="w-24">
+            Tasdiqlash
+          </Button>
+        </div>
+      </Dialog.Panel>
+    </Dialog>
   </div>
 </template>

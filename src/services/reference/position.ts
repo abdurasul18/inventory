@@ -9,13 +9,13 @@ export interface IPosition {
 
 export const PositionService = {
   getList(data: IParams): ResType<IPosition> {
-    return ApiService.get(`/position/all?${createQuery(data)}`);
+    return ApiService.get(`/position/all}?${createQuery(data)}`);
   },
-  cretate(data: any) {
+  create(data: any) {
     return ApiService.post("/position", data);
   },
   delete(id: any) {
-    return ApiService.delete(`/position/${id}`);
+    return ApiService.delete(`/position/id/${id}`);
   },
   update(id: any, data: any) {
     return ApiService.post(`/position/id/${id}`, data);

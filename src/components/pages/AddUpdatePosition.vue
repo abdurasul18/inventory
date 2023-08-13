@@ -20,29 +20,20 @@ let props = defineProps<{
 onMounted(() => {
     if (props.mode == 'update') {
         form.value.name = props.item.name
-        form.value.shortName = props.item.shortName
-        form.value.year = new Date(props.item.year).getFullYear()
-
     }
 })
 let emits = defineEmits(["close", "success"]);
 
 let form = ref({
-    shortName: "",
     name: "",
-    year: null as any,
 })
 
 const rules = {
-    shortName: {
-        required
-    },
+
     name: {
         required
     },
-    year: {
-        required
-    },
+
 };
 
 const v$ = useVuelidate(rules, form.value);
@@ -67,21 +58,6 @@ const select = ref("1");
                     Bu maydon bo'sh bo'lishi mumkin emas
                 </p>
             </div>
-            <div class="mt-3">
-                <FormLabel htmlFor="shortName">Qisqacha nomi</FormLabel>
-                <FormInput id="shortName" type="text" v-model:modelValue="form.shortName" />
-                <p class="mt-2 text-danger" v-if="v$.shortName.$error">
-                    Bu maydon bo'sh bo'lishi mumkin emas
-                </p>
-            </div>
-            <div class="mt-3">
-                <FormLabel htmlFor="year">Yil</FormLabel>
-                <n-date-picker v-model:formatted-value="form.year" value-format="yyyy" type="year" clearable placeholder="" />
-                <p class="mt-2 text-danger" v-if="v$.year.$error">
-                    Bu maydon bo'sh bo'lishi mumkin emas
-                </p>
-            </div>
-
         </div>
         <div class="flex justify-end  mt-4">
             <Button @click="emits('close')">
