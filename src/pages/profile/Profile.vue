@@ -6,6 +6,14 @@ import Lucide from "../../base-components/Lucide";
 import { Tab } from "../../base-components/Headless";
 import Loading from "../../base-components/Loading/Loading.vue";
 import { useUserSession } from "../../stores/userSession";
+import  { useSideMenuStore } from "../../stores/side-menu";
+let  { breadcrumb } = toRefs(useSideMenuStore())
+breadcrumb.value = [
+    {
+        title: "Tashkilot ma'lumotlari",
+        url: "/profile"
+    }
+]
 let { user } = toRefs(useUserSession());
 let { getProfile } = useUserSession();
 let loading = ref(false);

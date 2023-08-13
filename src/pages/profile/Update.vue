@@ -9,6 +9,8 @@ import {
     FormSelect,
     FormTextarea,
 } from "../../base-components/Form";
+import CMapView from "../../components/Form/Map/CMapView.vue";
+import CMap from "../../components/Form/Map/CMap.vue";
 import SelectProject from "../../components/Form/SelectProject.vue";
 import Lucide from "../../base-components/Lucide";
 import Tippy from "../../base-components/Tippy";
@@ -27,6 +29,8 @@ import { useToast } from "vue-toast-notification";
 import { UserService } from "../../services/user";
 import { useUserSession } from "../../stores/userSession";
 import { useRouter } from "vue-router";
+import LeafletMap from "../../components/LeafletMap";
+import SelectMap from "../../components/Form/Map";
 const toast = useToast();
 const router = useRouter();
 let { user } = toRefs(useUserSession());
@@ -168,8 +172,9 @@ async function onSubmit() {
     }
 };
 
-
-const select = ref("1");
+let locationShow = ref(false);
+let location = ref<Number[] | null[]>([20, 20]);
+let show = ref(true);
 </script>
 
 <template>
@@ -254,7 +259,7 @@ const select = ref("1");
                                 Bu maydon bo'sh bo'lishi mumkin emas
                             </p>
                         </div>
-                       
+
 
                     </div>
                 </div>
@@ -350,16 +355,30 @@ const select = ref("1");
                         </div>
                     </div>
                 </div>
-
-
             </div>
-
         </div>
-        <div class="flex  mt-4">
-            <Button variant="primary" @click="onSubmit" style="min-width: 200px;" class="mr-auto">
+        <div class="box">
+            <div class="flex justify-center">
+
+                <!-- <Button v-if="locationShow" @click="locationShow = false" class="mr-1">
+                    <Lucide icon="SidebarClose" class="w-4 h-4 mr-1" />
+                    Bekor qilish
+                </Button>
+                <Button variant="primary" @click="show = true">
+                    <Lucide icon="Locate" class="w-4 h-4 mr-1" />
+                    Joylashuvni tanlash
+                </Button> -->
+            </div>
+        </div>
+        <div class="flex justify-end mt-4">
+            <Button @click="$router.back()" variant="outline-primary" class="ml-auto " style="min-width: 200px;">
+                <Lucide icon="X" class="w-4 h-4 mr-1" /> Bekor qilish
+            </Button>
+            <Button variant="primary" @click="onSubmit" style="min-width: 200px;" class="ml-5">
                 <Lucide icon="Save" class="w-4 h-4 mr-1" /> Saqlash
             </Button>
         </div>
         <!-- END: Personal Information -->
+
     </div>
 </template>

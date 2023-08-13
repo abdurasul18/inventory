@@ -27,4 +27,7 @@ export const SoatoService = {
       `soato/all?soatoType=${soatoType || ""}&parentId=${parentId || ""}`
     );
   },
+  getById(id: any): Promise<AxiosResponse<ISoato>> {
+    return ApiService.get(`soato/id/${id}`);
+  },
 };

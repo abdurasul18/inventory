@@ -3,7 +3,8 @@ import SideMenu from "../layouts/SideMenu/SideMenu.vue";
 import SimpleMenu from "../layouts/SimpleMenu/SimpleMenu.vue";
 import TopMenu from "../layouts/TopMenu/TopMenu.vue";
 import Dahboard from "../pages/dashboard/Dashboard.vue";
-import Equipment from "../pages/Equipment.vue";
+import ItemList from "../pages/item/List.vue";
+import ItemCreate from "../pages/item/Create.vue";
 import ComputerRoom from "../pages/ComputerRoom.vue";
 import Users from "../pages/Users.vue";
 import Login from "../pages/Login.vue";
@@ -11,6 +12,9 @@ import Profile from "../pages/profile/Profile.vue";
 import ProfileUpdate from "../pages/profile/Update.vue";
 import Position from "../pages/reference/Position.vue";
 import Project from "../pages/reference/Project.vue";
+import ItemType from "../pages/reference/ItemType.vue";
+import City from "../pages/soato/City.vue";
+import Region from "../pages/soato/Region.vue";
 const routes = [
   {
     path: "/",
@@ -32,9 +36,14 @@ const routes = [
         component: ProfileUpdate,
       },
       {
-        path: "/equipment",
-        name: "Equipment",
-        component: Equipment,
+        path: "/item",
+        name: "ItemList",
+        component: ItemList,
+      },
+      {
+        path: "/item/create",
+        name: "ItemCreate",
+        component: ItemCreate,
       },
       {
         path: "/computer-room",
@@ -55,6 +64,21 @@ const routes = [
         path: "/reference/project",
         name: "Project",
         component: Project,
+      },
+      {
+        path: "/reference/item-type",
+        name: "ItemType",
+        component: ItemType,
+      },
+      {
+        path : "soato",
+        name : "City",
+        component : City
+      },
+      {
+        path : "soato/:id/region",
+        name : "Region",
+        component : Region
       }
     ],
   },

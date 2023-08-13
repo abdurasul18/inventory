@@ -11,6 +11,7 @@ export interface Menu {
 
 export interface SideMenuState {
   menu: Array<Menu | "divider">;
+  breadcrumb : { title: string, url: string }[];
 }
 
 export const useSideMenuStore = defineStore("sideMenu", {
@@ -28,13 +29,18 @@ export const useSideMenuStore = defineStore("sideMenu", {
       },
       {
         icon: "Activity",
-        pageName: "Equipment",
+        pageName: "ItemList",
         title: "Jihozlar ro'yxati",
       },
       {
         icon: "Activity",
         pageName: "ComputerRoom",
         title: "Kompyuter sinflari",
+      },
+      {
+        icon: "Activity",
+        pageName: "City",
+        title: "Huduudlar",
       },
       {
         icon: "Activity",
@@ -56,8 +62,14 @@ export const useSideMenuStore = defineStore("sideMenu", {
             pageName: "Project",
             title: "Loyihalar",
           },
+          {
+            icon: "Activity",
+            pageName: "ItemType",
+            title: "Jihoz turi",
+          },
         ],
       }
     ],
+    breadcrumb: [],
   }),
 });

@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import _ from "lodash";
 import { ref } from "vue";
-import fakerData from "../utils/faker";
-import Button from "../base-components/Button";
-import Pagination from "../base-components/Pagination";
-import { FormCheck, FormInput, FormSelect } from "../base-components/Form";
-import Lucide from "../base-components/Lucide";
-import Tippy from "../base-components/Tippy";
-import { Dialog, Menu } from "../base-components/Headless";
-import Table from "../base-components/Table";
+import fakerData from "../../utils/faker";
+import Button from "../../base-components/Button";
+import Pagination from "../../base-components/Pagination";
+import { FormCheck, FormInput, FormSelect } from "../../base-components/Form";
+import Lucide from "../../base-components/Lucide";
+import Tippy from "../../base-components/Tippy";
+import { Dialog, Menu } from "../../base-components/Headless";
+import Table from "../../base-components/Table";
 
 const deleteConfirmationModal = ref(false);
 const setDeleteConfirmationModal = (value: boolean) => {
@@ -21,7 +21,7 @@ const deleteButtonRef = ref(null);
     <h2 class="mt-10 text-lg font-medium intro-y">Seller List</h2>
     <div class="grid grid-cols-12 gap-6 mt-5">
         <div class="flex flex-wrap items-center col-span-12 mt-2 intro-y xl:flex-nowrap">
-            <Button variant="primary" class="mr-2 shadow-md"> Add New Seller </Button>
+            <Button @click="$router.push('/item/create')" variant="primary" class="mr-2 shadow-md"> Jihoz qo'shish </Button>
             <Menu>
                 <Menu.Button :as="Button" class="px-2 !box">
                     <span class="flex items-center justify-center w-5 h-5">
@@ -140,8 +140,8 @@ const deleteButtonRef = ref(null);
                                     Edit
                                 </a>
                                 <a class="flex items-center text-danger" href="#" @click="() => {
-                                        setDeleteConfirmationModal(true);
-                                    }
+                                    setDeleteConfirmationModal(true);
+                                }
                                     ">
                                     <Lucide icon="Trash2" class="w-4 h-4 mr-1" /> Delete
                                 </a>
@@ -184,8 +184,8 @@ const deleteButtonRef = ref(null);
     </div>
     <!-- BEGIN: Delete Confirmation Modal -->
     <Dialog :open="deleteConfirmationModal" @close="() => {
-            setDeleteConfirmationModal(false);
-        }
+        setDeleteConfirmationModal(false);
+    }
         " :initialFocus="deleteButtonRef">
         <Dialog.Panel>
             <div class="p-5 text-center">
@@ -198,8 +198,8 @@ const deleteButtonRef = ref(null);
             </div>
             <div class="px-5 pb-8 text-center">
                 <Button variant="outline-secondary" type="button" @click="() => {
-                        setDeleteConfirmationModal(false);
-                    }
+                    setDeleteConfirmationModal(false);
+                }
                     " class="w-24 mr-1">
                     Cancel
                 </Button>
