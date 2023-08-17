@@ -40,7 +40,7 @@ export const useSideMenuStore = defineStore("sideMenu", {
       {
         icon: "Activity",
         pageName: "City",
-        title: "Huduudlar",
+        title: "Hududlar",
       },
       {
         icon: "Activity",

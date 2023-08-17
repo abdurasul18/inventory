@@ -5,6 +5,7 @@ import { ILoginData } from "../services/auth";
 import { UserService, IUserData, IUserType } from "../services/user";
 import ApiService from "../services/api";
 
+let userTypes : IUserType[] = [ "RESPUBLIKA", "VILOYAT", "TUMAN" , "MAKTAB",];
 export const useUserSession = defineStore("userSession", () => {
   const loginData = useStorage("login_data", {}) as Ref<ILoginData | undefined>;
   const token = useStorage("access_token", "");
@@ -14,6 +15,13 @@ export const useUserSession = defineStore("userSession", () => {
   const isLoggedIn = computed(() => !!token.value);
   function setUser(newUser: IUserData) {
     user.value = newUser;
+  }
+  function getNextUserType(userType : IUserType) :IUserType{
+    let index = userTypes.indexOf(userType);
+    if (index === -1) {
+      return "MAKTAB";
+    }
+    return userTypes[index + 1] ? userTypes[index + 1] : "MAKTAB";
   }
   function login(data: ILoginData) {
     loginData.value = data;
@@ -47,6 +55,8 @@ export const useUserSession = defineStore("userSession", () => {
     setToken,
     login,
     getProfile,
+    // 
+    getNextUserType
   };
 });
 

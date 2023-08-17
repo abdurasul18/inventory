@@ -1,20 +1,17 @@
-import ApiService from "./api";
+import ApiService, { createQuery } from "./api";
+import { IParams } from "./types";
 import { AxiosResponse } from "axios";
 import { ISoato } from "./soato";
 import { ISchool } from "./school";
 export type IUserType = "RESPUBLIKA" | "VILOYAT" | "TUMAN" | "MAKTAB";
 
-export interface IUserData extends ISchool {
+export interface IUserData {
   avatar: string;
-  email: string;
-  firstname: string;
+  fio: string;
   id: string;
-  lastname: string;
-  schoolId: string;
-  soatoId: string;
-  soatoResponse: ISoato;
+  organizationId: string;
+  organizationResponse: ISchool;
   username: string;
-  userType: IUserType;
 }
 
 export const UserService = {
@@ -22,12 +19,21 @@ export const UserService = {
     return ApiService.get(`user/user/profile`);
   },
   updatePassword(data: object) {
-    return ApiService.post("/user/update-password", data);
+    return ApiService.post("/user/password/reset", data);
   },
   getById(id: string) {
     return ApiService.get(`/user/${id}`);
   },
   update(id: any, data: object) {
     return ApiService.put(`/user/update?id=${id}`, data);
+  },
+  getList(data: IParams) {
+    return ApiService.get(`/user/user/filter?${createQuery(data)}`);
+  },
+  passResetAdmin(data:any){
+    return ApiService.post(`/user/password/reset/admin`, data);
+  },
+  register(data: any) {
+    return ApiService.post(`/user/register`, data);
   }
 };

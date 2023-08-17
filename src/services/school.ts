@@ -1,6 +1,7 @@
-import ApiService from "./api";
+import ApiService, { createQuery } from "./api";
 import { ISchoolType } from "./school-type";
 import { ISoato } from "./soato";
+import { ResType } from "./types";
 
 export interface ISchool {
   address: string;
@@ -44,4 +45,13 @@ export const SchoolService = {
   getById(id: any) {
     return ApiService.get(`/school/id/${id}`);
   },
+  getList(data: { page: number; size: number; soatoId: string }): ResType<ISchool> {
+    return ApiService.get(`/school/all?${createQuery(data)}`);
+  },
+  delete(id: any) {
+    return ApiService.delete(`/school/${id}`);
+  },
+  update(id: any, data: object) {
+    return ApiService.put(`/school/update?id=${id}`, data);
+  }
 };

@@ -11,6 +11,7 @@ import AppNotFound from "./base-components/AppNotFound.vue";
 const app = createApp(App);
 app.use(router);
 app.use(createPinia());
+
 app.use(ToastPlugin);
 app.component("app-loading", LoadingVue);
 app.component("app-not-found", AppNotFound);

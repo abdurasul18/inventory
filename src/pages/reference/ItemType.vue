@@ -7,11 +7,22 @@ import { Dialog } from "../../base-components/Headless";
 import Button from "../../base-components/Button";
 import Lucide from "../../base-components/Lucide";
 import AppNotFound from "../../base-components/AppNotFound.vue";
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed, watch, toRefs } from "vue";
 import { ItemTypeService, IItemType } from "../../services/reference/item-type";
 import Loading from "../../base-components/Loading/Loading.vue";
 import AddUpdateItemType from "../../components/pages/AddUpdateItemType.vue";
 import { useToast } from "vue-toast-notification";
+import { useSideMenuStore } from "../../stores/side-menu";
+import { useRoute } from "vue-router";
+let { breadcrumb } = toRefs(useSideMenuStore())
+const route = useRoute()
+
+breadcrumb.value = [
+  {
+    title: "Jihoz turi",
+    url: route.fullPath
+  }
+]
 const toast = useToast();
 let loading = ref(false);
 let list = ref<IItemType[]>([]);
@@ -126,6 +137,10 @@ async function deleteItem() {
           </Table.Tbody>
           <AppNotFound v-if="!list.length" />
         </Table>
+        <div class="flex justify-end">
+          <n-pagination class="mt-4" v-model:page="page" :item-count="total" :page-sizes="[10, 20, 30, 40]"
+            v-model:page-size="limit" show-size-picker />
+        </div>
       </div>
     </Loading>
     <!-- BEGIN: Modal Toggle -->

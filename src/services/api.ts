@@ -95,6 +95,7 @@ const ApiService = {
               error.response.statusCode != 200 &&
               error.response.statusCode != 417
             ) {
+              $toast.clear();
               $toast.error(
                 error.response?.data?.detail ||
                   error.response?.data?.message ||

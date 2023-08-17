@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import _ from "lodash";
-import { ref, provide } from "vue";
+import { ref, provide, toRefs } from "vue";
 import fakerData from "../../utils/faker";
 import Button from "../../base-components/Button";
 import Pagination from "../../base-components/Pagination";
@@ -17,7 +17,13 @@ import SimpleLineChart1 from "../../components/SimpleLineChart1";
 import LeafletMap from "../../components/LeafletMap";
 import { Menu } from "../../base-components/Headless";
 import Table from "../../base-components/Table";
+import { useSideMenuStore } from "../../stores/side-menu";
+import { useRoute } from "vue-router";
+let { breadcrumb } = toRefs(useSideMenuStore())
+const route = useRoute()
 
+breadcrumb.value = [
+]
 const salesReportFilter = ref<string>("");
 const importantNotesRef = ref<TinySliderElement>();
 

@@ -7,11 +7,22 @@ import { Dialog } from "../../base-components/Headless";
 import Button from "../../base-components/Button";
 import Lucide from "../../base-components/Lucide";
 import AppNotFound from "../../base-components/AppNotFound.vue";
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed, watch, toRefs } from "vue";
 import { PositionService, IPosition } from "../../services/reference/position";
 import Loading from "../../base-components/Loading/Loading.vue";
 import AddUpdatePosition from "../../components/pages/AddUpdatePosition.vue";
 import { useToast } from "vue-toast-notification";
+import { useSideMenuStore } from "../../stores/side-menu";
+import { useRoute } from "vue-router";
+let { breadcrumb } = toRefs(useSideMenuStore())
+const route = useRoute()
+
+breadcrumb.value = [
+  {
+    title: "Lavozim",
+    url: route.fullPath
+  }
+]
 const toast = useToast();
 let loading = ref(false);
 let list = ref<IPosition[]>([]);

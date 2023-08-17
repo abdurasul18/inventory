@@ -7,11 +7,22 @@ import { Dialog } from "../../base-components/Headless";
 import Button from "../../base-components/Button";
 import Lucide from "../../base-components/Lucide";
 import AppNotFound from "../../base-components/AppNotFound.vue";
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed, watch, toRefs } from "vue";
 import { ProjectService, IProject } from "../../services/reference/project";
 import Loading from "../../base-components/Loading/Loading.vue";
 import AddUpdateProject from "../../components/pages/AddUpdateProject.vue";
 import { useToast } from "vue-toast-notification";
+import { useSideMenuStore } from "../../stores/side-menu";
+import { useRoute } from "vue-router";
+let { breadcrumb } = toRefs(useSideMenuStore())
+const route = useRoute()
+
+breadcrumb.value = [
+  {
+    title: "Loyiha turi",
+    url: route.fullPath
+  }
+]
 const toast = useToast();
 let loading = ref(false);
 let list = ref<IProject[]>([]);
@@ -130,6 +141,10 @@ async function deleteItem() {
           </Table.Tbody>
           <AppNotFound v-if="!list.length" />
         </Table>
+        <div class="flex justify-end">
+          <n-pagination class="mt-4" v-model:page="page" :item-count="total" :page-sizes="[10, 20, 30, 40]"
+            v-model:page-size="limit" show-size-picker />
+        </div>
       </div>
     </Loading>
     <!-- BEGIN: Modal Toggle -->

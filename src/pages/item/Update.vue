@@ -14,23 +14,22 @@ import { UserService } from "../../services/user";
 import { useUserSession } from "../../stores/userSession";
 import { useRoute, useRouter } from "vue-router";
 import SelectItemType from "../../components/Form/SelectItemType.vue";
-import { ItemService } from "../../services/item";
+import { IItem, ItemService } from "../../services/item";
 import Loading from "../../base-components/Loading/Loading.vue";
 import { useSideMenuStore } from "../../stores/side-menu";
-import SelectPCRoom from "../../components/Form/SelectPCRoom.vue";
 let { breadcrumb } = toRefs(useSideMenuStore())
 const route = useRoute()
 
 breadcrumb.value = [
   {
-    title: "Jihoz Qo'shish",
+    title: "Jihoz Tahrirlash",
     url: route.fullPath
   }
 ]
 const toast = useToast();
 const router = useRouter();
 let { user } = toRefs(useUserSession());
-let organizationId = computed(() => {
+let schoolId = computed(() => {
     return String(route.params?.id || '') || user.value?.organizationId;
 })
 
@@ -41,10 +40,13 @@ let form = ref({
     invertNumber: "",
     itemTypeId: "",
     model: "",
- name : "",
+    nameEng: "",
+    nameRu: "",
+    nameUz: "",
     pcRoomId: "",
+    projectId: "",
+    schoolId: "",
     serialNumber: "",
-    projectId : "",
     state: ""
 })
 
@@ -64,13 +66,22 @@ const rules = {
     model: {
 
     },
-   name: {
+    nameEng: {
+
+    },
+    nameRu: {
+
+    },
+    nameUz: {
 
     },
     pcRoomId: {
 
     },
     projectId: {
+
+    },
+    schoolId: {
 
     },
     serialNumber: {
@@ -83,7 +94,30 @@ const rules = {
 
 const v$ = useVuelidate(rules, form.value);
 let loading = ref(false);
-
+let data = ref<IItem>();
+onMounted(async () => {
+    try {
+        loading.value = true;
+        let res = await ItemService.getById(route.params.id);
+        data.value = res.data;
+        form.value = {
+            count: data.value.count,
+            invertNumber: data.value.invertNumber,
+            itemTypeId: data.value.itemTypeId,
+            nameEng: data.value.nameEng,
+            nameRu: data.value.nameRu,
+            nameUz: data.value.nameUz,
+            pcRoomId: data.value.pcRoomId,
+            projectId: data.value.projectId,
+            schoolId: data.value.schoolId,
+            serialNumber: data.value.serialNumber,
+            state: data.value.state
+        } as any
+    }
+    finally {
+        loading.value = false;
+    }
+})
 let addLoading = ref(false);
 async function validate() {
     let result = await v$.value.$validate();
@@ -95,11 +129,10 @@ async function onSubmit() {
             addLoading.value = true;
             let payload = {
                 ...form.value,
-                organizationId: organizationId.value
             }
-            await ItemService.create(payload)
+            await ItemService.update(data.value?.id, payload)
             toast.success("Ma'lumotlar muvaffaqiyatli saqlandi");
-            await router.push(`/school/${organizationId.value}/item`);
+            await router.push(`/school/${data.value?.schoolId}/item`);
         }
         finally {
             addLoading.value = false;
@@ -126,8 +159,8 @@ let show = ref(true);
                 <div class="grid grid-cols-2 gap-x-4">
                     <div class="mb-3">
                         <FormLabel htmlFor="name">Nomi</FormLabel>
-                        <FormInput id="name" type="text" v-model:modelValue="form.name" />
-                        <p class="mt-2 text-danger" v-if="v$.name.$error">
+                        <FormInput id="name" type="text" v-model:modelValue="form.nameUz" />
+                        <p class="mt-2 text-danger" v-if="v$.nameUz.$error">
                             Bu maydon bo'sh bo'lishi mumkin emas
                         </p>
                     </div>
@@ -156,13 +189,6 @@ let show = ref(true);
                     <div class="mb-3">
                         <FormLabel htmlFor="itemTypeId">Jihoz turi</FormLabel>
                         <SelectItemType id="itemTypeId" v-model:value="form.itemTypeId" />
-                        <p class="mt-2 text-danger" v-if="v$.itemTypeId.$error">
-                            Bu maydon bo'sh bo'lishi mumkin emas
-                        </p>
-                    </div>
-                    <div class="mb-3">
-                        <FormLabel htmlFor="itemTypeId">Kompyuter xonasi</FormLabel>
-                        <SelectPCRoom :organization-id="organizationId" id="itemTypeId" v-model:value="form.itemTypeId" />
                         <p class="mt-2 text-danger" v-if="v$.itemTypeId.$error">
                             Bu maydon bo'sh bo'lishi mumkin emas
                         </p>

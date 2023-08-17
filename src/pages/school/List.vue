@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import _ from "lodash";
-import { ref, computed, watch, onMounted, toRefs } from "vue";
+import { ref, computed, toRefs, onMounted, watch } from "vue";
 import fakerData from "../../utils/faker";
 import Button from "../../base-components/Button";
 import Pagination from "../../base-components/Pagination";
@@ -9,44 +9,36 @@ import Lucide from "../../base-components/Lucide";
 import Tippy from "../../base-components/Tippy";
 import { Dialog, Menu } from "../../base-components/Headless";
 import Table from "../../base-components/Table";
-import { ItemService, IItem } from "../../services/item";
 import { SchoolService, ISchool } from "../../services/school";
-import { OrganizationService } from "../../services/organization";
-import { useRoute } from "vue-router";
+import { SoatoService, ISoato } from "../../services/soato";
 import Loading from "../../base-components/Loading/Loading.vue";
 import AppNotFound from "../../base-components/AppNotFound.vue";
 import { paginate } from "../../globals";
-import { useUserSession } from "../../stores/userSession";
 import { useSideMenuStore } from "../../stores/side-menu";
+import { OrganizationService } from "../../services/organization";
+import { useRoute } from "vue-router";
 let { breadcrumb } = toRefs(useSideMenuStore());
 const route = useRoute();
 
 breadcrumb.value = [
   {
-    title: "Jihozlar",
+    title: "Maktablar",
     url: route.fullPath,
   },
 ];
-const { user } = toRefs(useUserSession());
-let routeId = computed(() => String(route.params.id || "") || user.value?.organizationId);
-watch(
-  () => routeId.value,
-  async () => {
-    getSchool();
-    getList();
-  }
-);
+let routeId = computed(() => String(route.params.id));
+
 let loading = ref(false);
-let list = ref<IItem[]>([]);
-let school = ref<ISchool>();
-function getSchool() {
-  OrganizationService.getById(routeId.value).then((res) => {
-    school.value = res.data;
+let list = ref<ISchool[]>([]);
+let soato = ref<ISoato>();
+function getSoato() {
+  SoatoService.getById(routeId.value).then((res) => {
+    soato.value = res.data;
   });
 }
 onMounted(() => {
   getList();
-  getSchool();
+  getSoato();
 });
 let page = ref(1);
 let limit = ref(20);
@@ -55,14 +47,15 @@ let params = computed(() => {
   return {
     page: page.value - 1,
     size: limit.value,
-    organizationId: routeId.value,
+    soatoId: routeId.value,
+    organizationType: "MAKTAB",
   };
 });
 
 async function getList() {
   try {
     loading.value = true;
-    const res = await ItemService.getList(params.value);
+    const res = await OrganizationService.getOrganizations(params.value);
     list.value = res.data.content;
     total.value = res.data.totalElements;
   } catch (error) {
@@ -79,7 +72,7 @@ watch(
   }
 );
 
-let currentItem = ref<IItem>();
+let currentItem = ref<ISchool>();
 
 const deleteConfirmationModal = ref(false);
 
@@ -87,7 +80,7 @@ async function deleteItem() {
   try {
     deleteConfirmationModal.value = false;
     loading.value = true;
-    await ItemService.delete(currentItem.value?.id);
+    await SchoolService.delete(currentItem.value?.id);
     getList();
   } catch (error) {
     console.log(error);
@@ -99,7 +92,11 @@ async function deleteItem() {
 
 <template>
   <h2 class="mt-10 text-lg font-medium intro-y">
-    {{ school?.soatoResponse.nameUz }} {{ school?.name }}
+    <Button style="font-size: 14px;" variant="secondary" class="mr-5" @click="$router.back()"
+      ><Lucide icon="ArrowLeft" /> Orqaga
+    </Button>
+
+    {{ soato?.nameUz }}
   </h2>
 
   <Loading :active="loading" style="min-height: 500px">
@@ -112,37 +109,33 @@ async function deleteItem() {
                     </div> -->
         </div>
       </div>
-      <div class="flex justify-between col-span-12">
-        <Button variant="secondary" class="mr-5" @click="$router.back()"
-          ><Lucide icon="ArrowLeft" /> Orqaga
-        </Button>
-        <Button
-          @click="$router.push(`/school/${school?.id}/item-create`)"
-          class="ml-auto"
-          variant="primary"
-        >
-          Qo'shish
-        </Button>
-      </div>
       <!-- BEGIN: Data List -->
       <div class="col-span-12 overflow-auto intro-y 2xl:overflow-visible">
-        <Table class="border-spacing-y-[10px] border-separate -mt-2 text-center">
+        <Table class="border-spacing-y-[10px] border-separate -mt-2">
           <Table.Thead>
             <Table.Tr>
               <Table.Th class="border-b-0 whitespace-nowrap"> # </Table.Th>
-              <Table.Th class="border-b-0 whitespace-nowrap"> Jihoz nomi </Table.Th>
-              <Table.Th class="text-center border-b-0 whitespace-nowrap"> Turi </Table.Th>
+              <Table.Th class="border-b-0 whitespace-nowrap"> Maktab nomi </Table.Th>
               <Table.Th class="text-center border-b-0 whitespace-nowrap">
-                Inventarizatsiya raqami
+                Hudud
               </Table.Th>
               <Table.Th class="text-center border-b-0 whitespace-nowrap">
-                Seriya raqami
+                Manzil
               </Table.Th>
-              <Table.Th class="text-center border-b-0 whitespace-nowrap"> Soni </Table.Th>
+              <Table.Th class="text-center border-b-0 whitespace-nowrap"> INN </Table.Th>
               <Table.Th class="text-center border-b-0 whitespace-nowrap">
-                Loyiha turi
+                Telefon raqami
               </Table.Th>
-
+              <Table.Th class="text-center border-b-0 whitespace-nowrap">
+                Maktab turi
+              </Table.Th>
+             
+              <Table.Th class="text-center border-b-0 whitespace-nowrap">
+              Maktab sig'imi
+              </Table.Th>
+              <Table.Th class="text-center border-b-0 whitespace-nowrap">
+                Talabalari soni
+              </Table.Th>
               <Table.Th class="text-center border-b-0 whitespace-nowrap">
                 Amallar
               </Table.Th>
@@ -158,39 +151,59 @@ async function deleteItem() {
               <Table.Td
                 class="first:rounded-l-md last:rounded-r-md !py-3.5 bg-white border-b-0 dark:bg-darkmode-600 shadow-[20px_3px_20px_#0000000b]"
               >
-                {{ item.nameUz }}
+                {{ item.name }}
               </Table.Td>
               <Table.Td
-                class="first:rounded-l-md last:rounded-r-md !py-3.5 bg-white border-b-0 dark:bg-darkmode-600 shadow-[20px_3px_20px_#0000000b]"
+                class="first:rounded-l-md last:rounded-r-md text-center bg-white border-b-0 dark:bg-darkmode-600 shadow-[20px_3px_20px_#0000000b]"
               >
-                {{ item.itemTypeResponse.nameUz }}
+                {{ item.soatoResponse.nameUz }}
               </Table.Td>
               <Table.Td
-                class="first:rounded-l-md last:rounded-r-md !py-3.5 bg-white border-b-0 dark:bg-darkmode-600 shadow-[20px_3px_20px_#0000000b]"
+                class="first:rounded-l-md last:rounded-r-md text-center capitalize bg-white border-b-0 dark:bg-darkmode-600 shadow-[20px_3px_20px_#0000000b]"
               >
-                {{ item.invertNumber }}
+                {{ item.address }}
               </Table.Td>
               <Table.Td
-                class="first:rounded-l-md last:rounded-r-md !py-3.5 bg-white border-b-0 dark:bg-darkmode-600 shadow-[20px_3px_20px_#0000000b]"
+                class="first:rounded-l-md last:rounded-r-md w-40 bg-white border-b-0 dark:bg-darkmode-600 shadow-[20px_3px_20px_#0000000b]"
               >
-                {{ item.serialNumber }}
+                {{ item.inn }}
               </Table.Td>
               <Table.Td
-                class="first:rounded-l-md last:rounded-r-md !py-3.5 bg-white border-b-0 dark:bg-darkmode-600 shadow-[20px_3px_20px_#0000000b]"
+                class="first:rounded-l-md last:rounded-r-md text-center bg-white border-b-0 dark:bg-darkmode-600 shadow-[20px_3px_20px_#0000000b]"
               >
-                <n-tag variant="info"> {{ item.count }} </n-tag>
+                {{ item.phone }}
               </Table.Td>
               <Table.Td
-                class="first:rounded-l-md last:rounded-r-md !py-3.5 bg-white border-b-0 dark:bg-darkmode-600 shadow-[20px_3px_20px_#0000000b]"
+                class="first:rounded-l-md last:rounded-r-md text-center bg-white border-b-0 dark:bg-darkmode-600 shadow-[20px_3px_20px_#0000000b]"
               >
-                {{ item.projectResponse?.name || "" }}
+                <n-tag type="info">
+                  {{ item.govermental == 0 ? "Davlat maktabi" : "Xususiy maktab" }}
+                </n-tag>
               </Table.Td>
+              <Table.Td
+                class="first:rounded-l-md last:rounded-r-md text-center bg-white border-b-0 dark:bg-darkmode-600 shadow-[20px_3px_20px_#0000000b]"
+              >
+                <n-tag type="info"> {{ item.capacity || '-' }} </n-tag>
+              </Table.Td>
+              <Table.Td
+                class="first:rounded-l-md last:rounded-r-md text-center bg-white border-b-0 dark:bg-darkmode-600 shadow-[20px_3px_20px_#0000000b]"
+              >
+                <n-tag type="primary"> {{ item.studentCount }} </n-tag>
+              </Table.Td>
+            
               <Table.Td
                 class="first:rounded-l-md last:rounded-r-md w-40 bg-white border-b-0 dark:bg-darkmode-600 shadow-[20px_3px_20px_#0000000b] py-0 relative before:block before:w-px before:h-8 before:bg-slate-200 before:absolute before:left-0 before:inset-y-0 before:my-auto before:dark:bg-darkmode-400"
               >
                 <div class="flex items-center justify-center">
                   <RouterLink
-                    :to="`/item/${item.id}/update`"
+                    :to="`/school/${item.id}`"
+                    class="flex items-center mr-3"
+                    href="#"
+                  >
+                    <Lucide icon="Eye" class="w-4 h-4 mr-1" />
+                  </RouterLink>
+                  <RouterLink
+                    :to="`/profile/${item.id}/update`"
                     class="flex items-center text-info mr-3"
                     href="#"
                   >

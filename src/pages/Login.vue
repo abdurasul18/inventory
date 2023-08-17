@@ -10,6 +10,9 @@ import { AuthService, ILoginData } from "../services/auth";
 import { useUserSession } from "../stores/userSession";
 import { useRouter } from "vue-router";
 import Loading from "../base-components/Loading/Loading.vue";
+import { useToast } from "vue-toast-notification";
+
+const toast = useToast()
 const { login } = useUserSession()
 const router = useRouter()
 let form = ref({
@@ -24,6 +27,11 @@ async function loginUser() {
     let res = await AuthService.login(form.value)
     login(res)
     await router.push("/")
+  }
+  catch (err: any) {
+    toast.error('Login yoki parol xato kiritilgan', {
+      position: "top-right",
+    })
   }
   finally {
     loading.value = false

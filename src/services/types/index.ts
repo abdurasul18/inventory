@@ -18,4 +18,5 @@ export interface IParams {
   page: number;
   size: number;
   search?: string;
+  organizationType ?: string;
 }
