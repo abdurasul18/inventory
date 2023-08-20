@@ -2,17 +2,44 @@
 import LeafletMapLoader, { Init } from "../../base-components/LeafletMapLoader";
 import { getColor } from "../../utils/colors";
 import { useDarkModeStore } from "../../stores/dark-mode";
-import location from "../../assets/json/location.json";
 import { useColorSchemeStore } from "../../stores/color-scheme";
-import { computed, watch } from "vue";
-
+import { computed, watch, ref, onMounted } from "vue";
+import { OrganizationService } from "../../services/organization";
+import { ISchool } from "../../services/school";
 const darkMode = computed(() => useDarkModeStore().darkMode);
 const colorScheme = computed(() => useColorSchemeStore().colorScheme);
+let location = ref<
+  {
+    name: string;
+    latitude: any;
+    longitude: any;
+  }[]
+>([]);
+let loading = ref(false);
+onMounted(async () => {
+  loading.value = true;
+  const res = await OrganizationService.getOrganizations({
+    page: 0,
+    size: 10000000,
+    organizationType: "MAKTAB",
+    soatoId: "17",
+  });
+  if (res.data) {
+    location.value = res.data.content.map((item: ISchool) => {
+      return {
+        name: item.name,
+        latitude: item.latitude,
+        longitude: item.longitude,
+      };
+    });
+  }
+  loading.value = false;
+});
 
 const init: Init = async (initializeMap) => {
   const mapInstance = await initializeMap({
     config: {
-      center: [-6.2425342, 106.8626478],
+      center: [41.311206675258866, 69.27973151206972],
       zoom: 9,
     },
   });
@@ -38,8 +65,7 @@ const init: Init = async (initializeMap) => {
           darkMode.value && colorScheme.value
             ? getColor("darkmode.100", 0.6)
             : getColor("primary", 0.8);
-        const mapMarkerRegionSvg =
-          window.btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="55.066" height="47.691" viewBox="0 0 55.066 47.691">
+        const mapMarkerRegionSvg = window.btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="55.066" height="47.691" viewBox="0 0 55.066 47.691">
                 <g id="Group_15" data-name="Group 15" transform="translate(-319.467 -83.991)">
                   <g id="Group_14" data-name="Group 14">
                     <path id="Intersection_4" data-name="Intersection 4" d="M12.789,17.143a15,15,0,0,1,20.7,0l-1.6,2.141-.018-.018a12.352,12.352,0,0,0-17.469,0l-.018.018Z" transform="translate(323.861 78.999)" fill="${color}" opacity="0.845"/>
@@ -81,15 +107,14 @@ const init: Init = async (initializeMap) => {
       darkMode.value && colorScheme.value
         ? getColor("darkmode.100")
         : getColor("primary");
-    const mapMarkerSvg =
-      window.btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="20" height="31.063" viewBox="0 0 20 31.063">
+    const mapMarkerSvg = window.btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="20" height="31.063" viewBox="0 0 20 31.063">
               <g id="Group_16" data-name="Group 16" transform="translate(-408 -150.001)">
                 <path id="Subtraction_21" data-name="Subtraction 21" d="M10,31.064h0L1.462,15.208A10,10,0,1,1,20,10a9.9,9.9,0,0,1-1.078,4.522l-.056.108c-.037.071-.077.146-.121.223L10,31.062ZM10,2a8,8,0,1,0,8,8,8,8,0,0,0-8-8Z" transform="translate(408 150)" fill="${color}"/>
                 <circle id="Ellipse_26" data-name="Ellipse 26" cx="6" cy="6" r="6" transform="translate(412 154)" fill="${color}"/>
               </g>
             </svg>
           `);
-    location.map(function (markerElem) {
+    location.value.map(function (markerElem) {
       const marker = leaflet.marker(
         {
           lat: parseFloat(markerElem.latitude),
@@ -103,13 +128,29 @@ const init: Init = async (initializeMap) => {
           }),
         }
       );
+      const popup = leaflet.popup({
+        closeButton: true,
+        closeOnClick: true,
+        autoClose: true,
+        className: "w-64",
+      }).setContent(markerElem.name);
       markers.addLayer(marker);
+      marker.bindPopup(popup);
     });
 
     const unwatch = watch([colorScheme, darkMode], () => {
       unwatch();
       init(initializeMap);
     });
+    watch(
+      () => location.value,
+      () => {
+        init(initializeMap);
+      },
+      {
+        deep: true,
+      }
+    );
   }
 };
 </script>

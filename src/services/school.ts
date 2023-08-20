@@ -9,7 +9,10 @@ export interface ISchool {
   aktName: string;
   aktPhone: string;
   aktPositionId: string;
-  aktPositionResponse: string;
+  aktPositionResponse: {
+    id: string;
+    name: string;
+  };
   aktSecondName: string;
   capacity: string;
   createdBy: string;
@@ -19,12 +22,15 @@ export interface ISchool {
   headLastname: string;
   headName: string;
   headPositionId: string;
-  headPositionResponse: string;
+  headPositionResponse: {
+    id: string;
+    name: string;
+  };
   headSecondName: string;
   id: string;
   inn: string;
-  latitude: string;
-  longitude: string;
+  latitude: number;
+  longitude: number;
   maktabErpId: string;
   modifiedBy: string;
   modifiedDate: string;
@@ -39,6 +45,7 @@ export interface ISchool {
   soatoResponse: ISoato;
   studentCount: string;
   website: string;
+  organizationType: string;
 }
 
 export const SchoolService = {

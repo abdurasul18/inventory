@@ -194,7 +194,7 @@ onMounted(() => {
               </n-list-item>
               <n-list-item>
                 <span> Lavozimi </span>
-                <span> {{ schoolData?.headPositionResponse }} </span>
+                <span> {{ schoolData?.headPositionResponse?.name }} </span>
               </n-list-item>
               <n-list-item>
                 <strong class="mx-auto"> AKT mas'ul shaxs </strong>
@@ -208,7 +208,7 @@ onMounted(() => {
               </n-list-item>
               <n-list-item>
                 <span> Lavozimi </span>
-                <span> {{ schoolData?.aktPositionResponse }} </span>
+                <span> {{ schoolData?.aktPositionResponse?.name }} </span>
               </n-list-item>
               <n-list-item>
                 <span> Telefon raqami </span>

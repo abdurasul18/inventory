@@ -90,7 +90,7 @@ async function addItem(item: any) {
       let res = await PCService.update(currentItem.value?.id, payload);
     }
     addShow.value = false;
-    toast.info("Project muvaffaqiyatli saqlandi");
+    toast.info("Muvaffaqiyatli saqlandi");
     getList();
   } finally {
     addLoading.value = false;
@@ -175,12 +175,12 @@ async function deleteItem() {
               <Table.Td
                 class="first:rounded-l-md last:rounded-r-md !py-3.5 bg-white border-b-0 dark:bg-darkmode-600 shadow-[20px_3px_20px_#0000000b]"
               >
-                {{ item.schoolTypeResponse.name }}
+                {{ item.organizationResponse?.name }}
               </Table.Td>
               <Table.Td
                 class="first:rounded-l-md last:rounded-r-md !py-3.5 bg-white border-b-0 dark:bg-darkmode-600 shadow-[20px_3px_20px_#0000000b]"
               >
-                {{ item.soatoResponse.nameUz }}
+                {{ item.organizationResponse?.soatoResponse.nameUz }}
               </Table.Td>
 
               <Table.Td

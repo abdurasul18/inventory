@@ -68,7 +68,7 @@ const ApiService = {
     this._401interceptor = axios.interceptors.response.use(
       (response) => {
         if (response.data?.result?.code == 400) {
-          $toast.error(response.data?.result?.message);
+          // $toast.error(response.data?.result?.message);
           throw new Error(response.data?.result);
         }
         return response;

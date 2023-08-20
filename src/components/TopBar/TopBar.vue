@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import Lucide from "../../base-components/Lucide";
 import Breadcrumb from "../../base-components/Breadcrumb";
 import { FormInput } from "../../base-components/Form";
@@ -10,6 +10,7 @@ import { useRouter } from "vue-router"
 import { useUserSession } from "../../stores/userSession";
 import { useRoute } from "vue-router";
 import { useSideMenuStore } from "../../stores/side-menu";
+import { ImageService } from "../../services/image";
 import { toRefs } from "@vueuse/core";
 const { breadcrumb } = toRefs(useSideMenuStore())
 const route = useRoute()
@@ -24,7 +25,13 @@ const hideSearchDropdown = () => {
   searchDropdown.value = false;
 };
 
-
+let imgBase64 = ref("");
+onMounted(async () => {
+  if (user.value?.avatar) {
+    let res = await ImageService.getById(user.value?.avatar);
+    imgBase64.value = res.data.imgBase64;
+  }
+});
 
 
 async function logout() {
@@ -46,14 +53,17 @@ async function logout() {
     <Menu>
       <Menu.Button class="block p-3 overflow-hidden rounded-full shadow-lg image-fit zoom-in intro-x">
        <div class="flex items-center justify-center">
-        <Lucide class="text-primary" icon="User"/> {{ user?.lastname }} {{ user?.firstname }} {{ user?.username}}
+        <img style="width: 40px; border-radius: 50%;" v-if="imgBase64" :src="imgBase64" alt="">
+        <Lucide v-else class="text-primary" icon="User"/> 
+        
+        {{ user?.lastname }} {{ user?.firstname }} {{ user?.username}}
        </div>
       </Menu.Button>
       <Menu.Items class="w-56 mt-px text-white bg-primary">
         <Menu.Header class="font-normal">
           <div class="font-medium">{{ user?.username }}</div>
           <div class="text-xs text-white/70 mt-0.5 dark:text-slate-500">
-            {{ user?.userType }}
+            {{ user?.organizationResponse.organizationType }}
           </div>
         </Menu.Header>
         <Menu.Divider class="bg-white/[0.08]" />

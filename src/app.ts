@@ -1,5 +1,7 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
+import Maska from "maska";
+
 import App from "./App.vue";
 import router from "./router";
 import "vue-toast-notification/dist/theme-sugar.css";
@@ -11,11 +13,12 @@ import AppNotFound from "./base-components/AppNotFound.vue";
 const app = createApp(App);
 app.use(router);
 app.use(createPinia());
-
 app.use(ToastPlugin);
 app.component("app-loading", LoadingVue);
 app.component("app-not-found", AppNotFound);
+app.use(Maska)
 app.mount("#app");
+
 const userSession = useUserSession();
 ApiService.init();
 ApiService.mount401Interceptor();

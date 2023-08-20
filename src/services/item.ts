@@ -10,6 +10,10 @@ export interface IItem {
   createdDate: string;
   id: string;
   images: string[];
+  imageBase64 : {
+    name : string,
+    url : string
+  }[]
   invertNumber: string;
   itemTypeId: string;
   itemTypeResponse: IItemType;
@@ -27,6 +31,7 @@ export interface IItem {
   schoolResponse: ISchool;
   serialNumber: string;
   state: string;
+  organizationId :string
 }
 export const ItemService = {
   getList(data: {

@@ -87,12 +87,19 @@ async function addUser(e: any) {
   addShow.value = false;
   loading.value = true;
   try {
-    await UserService.register({
-      ...e,
-      organizationId: routeId.value,
-    });
+    if (mode.value == "create") {
+      await UserService.register({
+        ...e,
+        organizationId: routeId.value,
+      });
+    } else {
+      await UserService.update(currentItem.value?.id, {
+        ...e,
+        organizationId: routeId.value,
+      });
+    }
     toast.success("Foydalanuvchi muvaffaqiyatli qo'shildi");
-    getList()
+    getList();
   } finally {
     loading.value = false;
   }
@@ -101,8 +108,11 @@ async function addUser(e: any) {
 
 <template>
   <h2 class="mt-10 text-lg font-medium intro-y">
-    <Button variant="secondary"  class="mr-5 text-sm" @click="$router.back()"><Lucide icon="ArrowLeft"/>  Orqaga </Button>
-  {{ organization?.name }}</h2>
+    <Button variant="secondary" class="mr-5 text-sm" @click="$router.back()"
+      ><Lucide icon="ArrowLeft" /> Orqaga
+    </Button>
+    {{ organization?.name }}
+  </h2>
 
   <Loading :active="loading" style="min-height: 500px">
     <div class="grid grid-cols-12 gap-6 mt-5">
@@ -171,12 +181,11 @@ async function addUser(e: any) {
               >
                 <div class="flex items-center justify-center">
                   <button
-                    @click="currentItem = item, mode = 'update', addShow = true"
+                    @click="(currentItem = item), (mode = 'update'), (addShow = true)"
                     class="flex items-center mr-3"
                   >
                     <Lucide icon="Edit" class="w-4 h-4 mr-1" />
                   </button>
-                 
                 </div>
               </Table.Td>
             </Table.Tr>

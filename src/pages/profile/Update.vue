@@ -11,7 +11,7 @@ import {
 } from "../../base-components/Form";
 import CMapView from "../../components/Map/CMapView.vue";
 import CMap from "../../components/Map/CMap.vue";
-import SelectProject from "../../components/Form/SelectProject.vue";
+import SelectPosition from "../../components/Form/SelectPosition.vue";
 import Lucide from "../../base-components/Lucide";
 import Tippy from "../../base-components/Tippy";
 import TomSelect from "../../base-components/TomSelect";
@@ -33,6 +33,7 @@ import LeafletMap from "../../components/Map/LeafletMap.vue";
 import { useRoute } from "vue-router";
 import { OrganizationService } from "../../services/organization";
 import { useSideMenuStore } from "../../stores/side-menu";
+import { ISchool } from "../../services/school";
 
 let { breadcrumb } = toRefs(useSideMenuStore());
 const route = useRoute();
@@ -88,60 +89,60 @@ let form = ref({
 
 const rules = {
   address: {
-    required,
+    // required,
   },
   aktLastname: {
-    required,
+    // required,
   },
   aktName: {
-    required,
+    // required,
   },
   aktPhone: {
-    required,
+    // required,
   },
   aktPositionId: {
-    required,
+    // required,
   },
   aktSecondName: {
-    required,
+    // required,
   },
   capacity: {
-    required,
+    // required,
   },
   email: {},
   hallWifiCount: {},
   head: {},
   headLastname: {
-    required,
+    // required,
   },
   headName: {
-    required,
+    // required,
   },
   headPositionId: {
-    required,
+    // required,
   },
   headSecondName: {
-    required,
+    // required,
   },
   inn: {
-    required,
+    // required,
   },
   internetSpeed: {},
   latitude: {},
   longitude: {},
   name: {
-    required,
+    // required,
   },
   needPc: {},
   number: {
-    required,
+    // required,
   },
   phone: {
-    required,
+    // required,
   },
   shortName: {},
   studentCount: {
-    required,
+    // required,
   },
   teacherRoomWifiCount: {},
   website: {},
@@ -149,14 +150,22 @@ const rules = {
 
 const v$ = useVuelidate(rules, form.value);
 let loading = ref(false);
+let data = ref<ISchool>();
 async function getData() {
   try {
     loading.value = true;
     let res = await OrganizationService.getById(userId.value);
-    let data = res.data as any;
-    for (const key in data) {
-      if (key in form.value) {
-        (form.value as any)[key] = data[key];
+    data.value = res.data;
+    let dataAny = data.value as any;
+    for (const key in dataAny) {
+      if (key in form.value && dataAny[key] !== null && dataAny[key] !== undefined) {
+        (form.value as any)[key] = dataAny[key];
+        if (data.value?.latitude) {
+          location.value = [data.value?.latitude, data.value?.longitude];
+        }
+        else {
+          noLocation.value = true;
+        }
       }
     }
   } finally {
@@ -174,7 +183,14 @@ async function validate() {
 }
 async function onSubmit() {
   if (await validate()) {
-    await OrganizationService.update(userId.value, form.value);
+    let payload = {
+      ...form.value,
+      latitude: noLocation.value ? 0 : location.value[0],
+      longitude: noLocation.value ? 0 : location.value[1],
+      soatoId: data.value?.soatoId,
+      organizationType: data.value?.organizationType,
+    };
+    await OrganizationService.update(userId.value, payload);
     toast.success("Ma'lumotlar muvaffaqiyatli saqlandi");
     await router.push("/profile");
   } else {
@@ -327,8 +343,12 @@ let show = ref(true);
               <div>
                 <FormLabel htmlFor="internetSpeed">Internet bormi</FormLabel>
               </div>
-              <n-radio-group v-model:value="form.haveInternet" size="medium">
-                <n-radio-button :value="true"> Ha </n-radio-button>
+              <n-radio-group
+                v-model:value="form.haveInternet"
+                size="medium"
+                name="radiobuttong"
+              >
+                <n-radio-button :value="true" checked> Ha </n-radio-button>
                 <n-radio-button :value="false"> Yo'q </n-radio-button>
               </n-radio-group>
             </div>
@@ -390,7 +410,7 @@ let show = ref(true);
               </div>
               <div class="mt-3">
                 <FormLabel htmlFor="headPositionId">Lavozimi</FormLabel>
-                <SelectProject v-model:value="form.headPositionId" />
+                <SelectPosition v-model:value="form.headPositionId" />
                 <p class="mt-2 text-danger" v-if="v$.headPositionId.$error">
                   Bu maydon bo'sh bo'lishi mumkin emas
                 </p>
@@ -446,7 +466,7 @@ let show = ref(true);
               </div>
               <div class="mt-3">
                 <FormLabel htmlFor="aktPositionId">Lavozimi</FormLabel>
-                <SelectProject v-model:value="form.aktPositionId" />
+                <SelectPosition v-model:value="form.aktPositionId" />
                 <p class="mt-2 text-danger" v-if="v$.aktPositionId.$error">
                   Bu maydon bo'sh bo'lishi mumkin emas
                 </p>

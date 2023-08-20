@@ -18,6 +18,7 @@ import AppNotFound from "../../base-components/AppNotFound.vue";
 import { paginate } from "../../globals";
 import { useUserSession } from "../../stores/userSession";
 import { useSideMenuStore } from "../../stores/side-menu";
+import { ImageService } from "../../services/image";
 let { breadcrumb } = toRefs(useSideMenuStore());
 const route = useRoute();
 
@@ -65,6 +66,20 @@ async function getList() {
     const res = await ItemService.getList(params.value);
     list.value = res.data.content;
     total.value = res.data.totalElements;
+    list.value.forEach(async (item) => {
+      let imgRes = await Promise.all(
+        item.images.map(async (img) => {
+          let res = await ImageService.getById(img);
+          return res.data;
+        })
+      );
+      item.imageBase64 = imgRes.map((el) => {
+        return {
+          name: item.nameUz || "",
+          url: el.imgBase64,
+        };
+      });
+    });
   } catch (error) {
     console.log(error);
   } finally {
@@ -130,6 +145,7 @@ async function deleteItem() {
           <Table.Thead>
             <Table.Tr>
               <Table.Th class="border-b-0 whitespace-nowrap"> # </Table.Th>
+              <Table.Th class="border-b-0 whitespace-nowrap"> Rasmlar </Table.Th>
               <Table.Th class="border-b-0 whitespace-nowrap"> Jihoz nomi </Table.Th>
               <Table.Th class="text-center border-b-0 whitespace-nowrap"> Turi </Table.Th>
               <Table.Th class="text-center border-b-0 whitespace-nowrap">
@@ -154,6 +170,24 @@ async function deleteItem() {
                 class="first:rounded-l-md last:rounded-r-md w-10 bg-white border-b-0 dark:bg-darkmode-600 shadow-[20px_3px_20px_#0000000b]"
               >
                 {{ paginate(index, page, limit) }}
+              </Table.Td>
+              <Table.Td
+                class="first:rounded-l-md last:rounded-r-md w-10 bg-white border-b-0 dark:bg-darkmode-600 shadow-[20px_3px_20px_#0000000b]"
+              >
+                <div v-if="item.imageBase64" class="flex">
+                  <div
+                    v-for="(img, index) in item.imageBase64"
+                    :class="{ '-ml-5': index > 0 }"
+                  >
+                    <div class="w-10 h-10 image-fit zoom-in">
+                      <n-image
+                        class="cursor-pointer rounded-full shadow-[0px_0px_0px_2px_#fff,_1px_1px_5px_rgba(0,0,0,0.32)] dark:shadow-[0px_0px_0px_2px_#3f4865,_1px_1px_5px_rgba(0,0,0,0.32)]"
+                        :src="img.url"
+                        alt=""
+                      />
+                    </div>
+                  </div>
+                </div>
               </Table.Td>
               <Table.Td
                 class="first:rounded-l-md last:rounded-r-md !py-3.5 bg-white border-b-0 dark:bg-darkmode-600 shadow-[20px_3px_20px_#0000000b]"

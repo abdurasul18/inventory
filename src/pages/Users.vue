@@ -22,7 +22,9 @@ import { useUserSession } from "../stores/userSession";
 const { user } = toRefs(useUserSession());
 const toast = useToast();
 const route = useRoute();
-let routeId = computed(() => String(route.params.id || "") || user.value?.organizationResponse.soatoId);
+let routeId = computed(
+  () => String(route.params.id || "") 
+);
 
 let loading = ref(false);
 let list = ref<IUserData[]>([]);
@@ -38,7 +40,7 @@ let params = computed(() => {
     page: page.value - 1,
     size: limit.value,
     soatoId: routeId.value || "17",
-    organizationType: user.value?.organizationResponse.soatoResponse.type,
+    organizationType: "RESPUBLIKA",
   };
 });
 
@@ -85,10 +87,17 @@ async function addUser(e: any) {
   addShow.value = false;
   loading.value = true;
   try {
-    await UserService.register({
-      ...e,
-      organizationId: routeId.value,
-    });
+    if (mode.value == "create") {
+      await UserService.register({
+        ...e,
+        organizationId: routeId.value,
+      });
+    } else {
+      await UserService.update(currentItem.value?.id, {
+        ...e,
+        organizationId: routeId.value,
+      });
+    }
     toast.success("Foydalanuvchi muvaffaqiyatli qo'shildi");
   } finally {
     loading.value = false;
@@ -167,18 +176,17 @@ async function addUser(e: any) {
                 <div class="flex items-center justify-center">
                   <span
                     style="cursor: pointer"
-                    @click="(currentItem = item), (updateShow = true)"
+                    @click="(mode = 'update'), (currentItem = item), (updateShow = true)"
                     class="flex items-center text-success mr-3"
                   >
                     <Lucide icon="Lock" class="w-4 h-4 mr-1" />
                   </span>
-                  <RouterLink
-                    :to="`/profile/${item.id}/update`"
-                    class="flex items-center text-info mr-3"
-                    href="#"
+                  <button
+                    @click="(currentItem = item), (mode = 'update'), (addShow = true)"
+                    class="flex items-center mr-3"
                   >
                     <Lucide icon="Edit" class="w-4 h-4 mr-1" />
-                  </RouterLink>
+                  </button>
                 </div>
               </Table.Td>
             </Table.Tr>

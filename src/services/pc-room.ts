@@ -2,7 +2,17 @@ import ApiService, { createQuery } from "./api";
 import { ResType, IParams } from "./types";
 import { AxiosResponse } from "axios";
 import { ISchool } from "./school";
-export interface IPCRoom extends ISchool {}
+export interface IPCRoom {
+  createdBy: string;
+  createdDate: string;
+  id: string;
+  modifiedBy: string;
+  modifiedDate: string;
+  name: string;
+  number: string;
+  organizationResponse: ISchool;
+  schoolId: string;
+}
 export const PCService = {
   getList(data: {
     page: number;
